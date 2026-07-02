@@ -1,11 +1,66 @@
 ---
+import os from 'node:os';
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const total = os.totalmem();
+const free = os.freemem();
+const used = total - free;
+const pct = ((used / total) * 100).toFixed(1);
+
+function fmt(bytes: number): string {
+	const gb = bytes / 1024 ** 3;
+	return gb >= 1 ? `${gb.toFixed(1)} GiB` : `${(bytes / 1024 ** 2).toFixed(0)} MiB`;
+}
 ---
 
 <Layout>
 	<Welcome />
+	<div class="ram-card">
+		<h2>Server Memory</h2>
+		<p>Total: {fmt(total)}</p>
+		<p>Free: {fmt(free)}</p>
+		<p>Used: {fmt(used)}</p>
+		<p>Usage: {pct}%</p>
+		<div class="bar-bg"><div class="bar-fill" style={`width:${pct}%`}></div></div>
+	</div>
 </Layout>
+
+<style>
+	.ram-card {
+		position: fixed;
+		bottom: 16px;
+		left: 16px;
+		background: rgba(255,255,255,0.9);
+		backdrop-filter: blur(12px);
+		border-radius: 16px;
+		padding: 16px 20px;
+		border: 1px solid rgba(0,0,0,0.08);
+		min-width: 200px;
+	}
+	.ram-card h2 {
+		margin: 0 0 8px;
+		font-size: 14px;
+		font-weight: 600;
+		color: #111827;
+	}
+	.ram-card p {
+		font-size: 13px;
+		margin: 2px 0;
+		color: #4b5563;
+	}
+	.bar-bg {
+		margin-top: 8px;
+		width: 100%;
+		height: 6px;
+		background: #e5e7eb;
+		border-radius: 3px;
+		overflow: hidden;
+	}
+	.bar-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #3245ff, #bc52ee);
+		border-radius: 3px;
+		transition: width 0.3s;
+	}
+</style>
