@@ -1,12 +1,20 @@
 ---
 import os from 'node:os';
+import { execSync } from 'node:child_process';
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+
+const ts = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+const cores = os.cpus().length;
+const [load1, load5, load15] = os.loadavg();
 
 const total = os.totalmem();
 const free = os.freemem();
 const used = total - free;
 const pct = ((used / total) * 100).toFixed(1);
+
+const diskRaw = execSync("df -h / | tail -1").toString().trim().split(/\s+/);
+const [diskTotal, diskUsed, diskFree, diskPct] = [diskRaw[1], diskRaw[2], diskRaw[3], diskRaw[4]];
 
 function fmt(bytes: number): string {
 	const gb = bytes / 1024 ** 3;
@@ -16,18 +24,36 @@ function fmt(bytes: number): string {
 
 <Layout>
 	<Welcome />
-	<div class="ram-card">
-		<h2>Server Memory</h2>
-		<p>Total: {fmt(total)}</p>
-		<p>Free: {fmt(free)}</p>
-		<p>Used: {fmt(used)}</p>
-		<p>Usage: {pct}%</p>
-		<div class="bar-bg"><div class="bar-fill" style={`width:${pct}%`}></div></div>
+	<div class="sys-card">
+		<div class="section">
+			<h2>Timestamp</h2>
+			<p>{ts} WIB</p>
+		</div>
+		<div class="section">
+			<h2>CPU ({cores} cores)</h2>
+			<p>Load: {load1.toFixed(2)} / {load5.toFixed(2)} / {load15.toFixed(2)}</p>
+		</div>
+		<div class="section">
+			<h2>Memory</h2>
+			<p>Total: {fmt(total)}</p>
+			<p>Free: {fmt(free)}</p>
+			<p>Used: {fmt(used)}</p>
+			<p>Usage: {pct}%</p>
+			<div class="bar-bg"><div class="bar-fill" style={`width:${pct}%`}></div></div>
+		</div>
+		<div class="section">
+			<h2>Disk</h2>
+			<p>Total: {diskTotal}</p>
+			<p>Free: {diskFree}</p>
+			<p>Used: {diskUsed}</p>
+			<p>Usage: {diskPct}</p>
+			<div class="bar-bg"><div class="bar-fill" style={`width:${diskPct}`}></div></div>
+		</div>
 	</div>
 </Layout>
 
 <style>
-	.ram-card {
+	.sys-card {
 		position: fixed;
 		bottom: 16px;
 		left: 16px;
@@ -36,31 +62,34 @@ function fmt(bytes: number): string {
 		border-radius: 16px;
 		padding: 16px 20px;
 		border: 1px solid rgba(0,0,0,0.08);
-		min-width: 200px;
+		min-width: 220px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
-	.ram-card h2 {
-		margin: 0 0 8px;
-		font-size: 14px;
+	.section h2 {
+		margin: 0 0 4px;
+		font-size: 13px;
 		font-weight: 600;
 		color: #111827;
 	}
-	.ram-card p {
-		font-size: 13px;
-		margin: 2px 0;
+	.section p {
+		font-size: 12px;
+		margin: 1px 0;
 		color: #4b5563;
 	}
 	.bar-bg {
-		margin-top: 8px;
+		margin-top: 4px;
 		width: 100%;
-		height: 6px;
+		height: 4px;
 		background: #e5e7eb;
-		border-radius: 3px;
+		border-radius: 2px;
 		overflow: hidden;
 	}
 	.bar-fill {
 		height: 100%;
 		background: linear-gradient(90deg, #3245ff, #bc52ee);
-		border-radius: 3px;
+		border-radius: 2px;
 		transition: width 0.3s;
 	}
 </style>
