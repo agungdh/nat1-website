@@ -111,6 +111,11 @@ function fmt(bytes: number): string {
 		<footer>
 			<p>This page is rendered at request time by Astro SSR running on Node.js inside a Docker container.</p>
 			<p>No public IP. No inbound ports. Just Cloudflare Tunnel.</p>
+			<div class="links">
+				<a href="https://github.com/agungdh/nat1-website">GitHub</a>
+				<a href="https://hub.docker.com/r/agungdh/nat1-website">Docker Hub</a>
+				<a href="https://github.com/agungdh/nat1-website/pkgs/container/nat1-website">GHCR</a>
+			</div>
 		</footer>
 	</main>
 </Layout>
@@ -309,6 +314,23 @@ function fmt(bytes: number): string {
 		color: #52525b;
 		margin: 2px 0;
 	}
+
+	.links {
+		margin-top: 12px;
+		display: flex;
+		justify-content: center;
+		gap: 16px;
+	}
+
+	.links a {
+		color: #f97316;
+		font-size: 13px;
+		font-weight: 600;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.links a:hover { color: #fb923c; }
 
 	@media (max-width: 600px) {
 		.page { padding: 24px 16px 60px; }
