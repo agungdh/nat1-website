@@ -1,7 +1,7 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { streamText } from 'ai';
 
-const API_KEY = import.meta.env.OPENCODE_API_KEY;
+const API_KEY = process.env.OPENCODE_API_KEY;
 
 if (!API_KEY) {
     throw new Error('Missing OPENCODE_API_KEY environment variable');
