@@ -1,7 +1,10 @@
 <div id="chatbot" class="chatbot">
     <div class="chat-header">
         <h2>AI Chatbot</h2>
-        <span class="chat-model">deepseek-v4-pro</span>
+        <select id="chat-model" class="chat-model-select">
+            <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+            <option value="mimo-v2.5">mimo-v2.5</option>
+        </select>
     </div>
     <div id="chat-toasts" class="chat-toasts"></div>
     <div id="chat-messages" class="chat-messages">
@@ -17,6 +20,7 @@
     const messagesContainer = document.getElementById('chat-messages');
     const input = document.getElementById('chat-input') as HTMLTextAreaElement;
     const sendBtn = document.getElementById('chat-send') as HTMLButtonElement;
+    const modelSelect = document.getElementById('chat-model') as HTMLSelectElement;
     const toastsContainer = document.getElementById('chat-toasts');
     const emptyState = messagesContainer!.querySelector('.chat-empty');
 
@@ -67,7 +71,7 @@
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: [...messages] }),
+                body: JSON.stringify({ messages: [...messages], model: modelSelect.value }),
             });
 
             if (!response.ok) throw new Error(`Server error: ${response.status}`);
@@ -150,12 +154,20 @@
         color: #fafafa;
     }
 
-    .chat-model {
-        font-size: 11px;
-        color: #71717a;
+    .chat-model-select {
+        font-size: 12px;
+        font-weight: 600;
         background: #27272a;
-        padding: 2px 8px;
-        border-radius: 10px;
+        color: #a1a1aa;
+        border: 1px solid #3f3f46;
+        border-radius: 8px;
+        padding: 4px 8px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .chat-model-select:focus {
+        border-color: #f97316;
     }
 
     .chat-messages {

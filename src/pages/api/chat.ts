@@ -16,10 +16,15 @@ const opencode = createOpenAICompatible({
 });
 
 export const POST = async ({ request }: { request: Request }) => {
-    const { messages } = await request.json();
+    const { messages, model } = await request.json();
+
+    const allowed = ['deepseek-v4-flash', 'mimo-v2.5'];
+    if (model && !allowed.includes(model)) {
+        return new Response(JSON.stringify({ error: `Invalid model: ${model}` }), { status: 400 });
+    }
 
     const result = streamText({
-        model: opencode('deepseek-v4-pro'),
+        model: opencode(model || 'deepseek-v4-flash'),
         messages: messages.slice(-20),
     });
 
