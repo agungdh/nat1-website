@@ -12,11 +12,13 @@ function formatDate(epochMs: number): string {
 }
 ---
 
-<a href={`/blog/${post.slug}`} class="blog-card">
+<div class="blog-card">
   <div class="blog-card-category">
     <a href={`/blog/category/${post.category.slug}`} class="blog-card-cat-link">{post.category.name}</a>
   </div>
-  <h3 class="blog-card-title">{post.title}</h3>
+  <h3 class="blog-card-title">
+    <a href={`/blog/${post.slug}`} class="blog-card-title-link">{post.title}</a>
+  </h3>
   <p class="blog-card-excerpt">{post.excerpt || post.content.slice(0, 200)}</p>
   <div class="blog-card-meta">
     <span class="blog-card-date">{post.publishedAt ? formatDate(post.publishedAt) : ''}</span>
@@ -26,7 +28,7 @@ function formatDate(epochMs: number): string {
       ))}
     </span>
   </div>
-</a>
+</div>
 
 <style>
   .blog-card {
@@ -35,7 +37,6 @@ function formatDate(epochMs: number): string {
     border: 1px solid #27272a;
     border-radius: 12px;
     padding: 20px;
-    text-decoration: none;
     transition: border-color 0.2s;
   }
 
@@ -62,8 +63,16 @@ function formatDate(epochMs: number): string {
   .blog-card-title {
     font-size: 20px;
     font-weight: 700;
-    color: #fafafa;
     margin: 0 0 8px;
+  }
+
+  .blog-card-title-link {
+    color: #fafafa;
+    text-decoration: none;
+  }
+
+  .blog-card-title-link:hover {
+    color: #fb923c;
   }
 
   .blog-card-excerpt {
