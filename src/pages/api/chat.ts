@@ -1,52 +1,38 @@
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { streamText } from 'ai';
-
-const API_KEY = process.env.OPENCODE_API_KEY;
-
-if (!API_KEY) {
-    throw new Error('Missing OPENCODE_API_KEY environment variable');
-}
-
-const opencode = createOpenAICompatible({
-    name: 'opencode',
-    baseURL: 'https://opencode.ai/zen/go/v1',
-    headers: {
-        Authorization: `Bearer ${API_KEY}`,
-    },
-});
+const BACKEND_URL = import.meta.env.BACKEND_API_URL || 'http://localhost:8080';
 
 export const POST = async ({ request }: { request: Request }) => {
-    const { messages, model } = await request.json();
+  const { messages } = await request.json();
 
-    const allowed = ['deepseek-v4-flash', 'mimo-v2.5'];
-    if (model && !allowed.includes(model)) {
-        return new Response(JSON.stringify({ error: `Invalid model: ${model}` }), { status: 400 });
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Backend chat error: ${res.status} - ${errText}`);
     }
 
-    const result = streamText({
-        model: opencode(model || 'deepseek-v4-flash'),
-        messages: messages.slice(-20),
-    });
+    const data = await res.json();
+    const reply = data.reply || '';
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
-        async start(controller) {
-            try {
-                for await (const chunk of result.textStream) {
-                    controller.enqueue(encoder.encode(chunk));
-                }
-                controller.close();
-            } catch (error) {
-                const msg = error instanceof Error ? error.message : 'Unknown error';
-                controller.enqueue(encoder.encode(`__ERROR__${msg}`));
-                controller.close();
-            }
-        },
+      start(controller) {
+        controller.enqueue(encoder.encode(reply));
+        controller.close();
+      },
     });
 
     return new Response(stream, {
-        headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-        },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
     });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: msg }), { status: 500 });
+  }
 };

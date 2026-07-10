@@ -1,0 +1,109 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+import { getPosts, getTagBySlug } from '../../../lib/api';
+
+const { slug } = Astro.params;
+const [posts, tag] = await Promise.all([
+  getPosts(),
+  getTagBySlug(slug!),
+]);
+
+if (!tag) {
+  return new Response(null, { status: 404, statusText: 'Tag not found' });
+}
+
+const filtered = posts
+  .filter((p) => p.status === 'PUBLISHED' && p.tags.some((t) => t.slug === slug))
+  .sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
+---
+
+<Layout title={`#${tag.name} — NAT1 Blog`}>
+  <main class="page">
+    <section class="hero">
+      <h1>#{tag.name}</h1>
+    </section>
+
+    <div class="blog-grid">
+      {filtered.length === 0 ? (
+        <p class="empty">No posts with this tag yet.</p>
+      ) : (
+        filtered.map((post) => <BlogCard post={post} />)
+      )}
+    </div>
+
+    <footer>
+      <a href="/blog" class="back-link">&larr; All posts</a>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e4e4e7;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 40px 0;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #f97316, #facc15, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .blog-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .empty {
+    text-align: center;
+    color: #52525b;
+    font-size: 15px;
+    padding: 40px 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #27272a;
+  }
+
+  .back-link {
+    color: #f97316;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: #fb923c;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 24px 16px 60px; }
+    .hero { padding: 24px 0 20px; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>

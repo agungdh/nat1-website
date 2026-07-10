@@ -1,0 +1,112 @@
+---
+import type { PostDto } from '../lib/api';
+
+const { post } = Astro.props as { post: PostDto };
+
+function formatDate(epochMs: number): string {
+  return new Date(epochMs).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+---
+
+<a href={`/blog/${post.slug}`} class="blog-card">
+  <div class="blog-card-category">
+    <a href={`/blog/category/${post.category.slug}`} class="blog-card-cat-link">{post.category.name}</a>
+  </div>
+  <h3 class="blog-card-title">{post.title}</h3>
+  <p class="blog-card-excerpt">{post.excerpt || post.content.slice(0, 200)}</p>
+  <div class="blog-card-meta">
+    <span class="blog-card-date">{post.publishedAt ? formatDate(post.publishedAt) : ''}</span>
+    <span class="blog-card-tags">
+      {post.tags.map(tag => (
+        <a href={`/blog/tag/${tag.slug}`} class="blog-card-tag">{tag.name}</a>
+      ))}
+    </span>
+  </div>
+</a>
+
+<style>
+  .blog-card {
+    display: block;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+
+  .blog-card:hover {
+    border-color: #f97316;
+  }
+
+  .blog-card-category {
+    margin-bottom: 8px;
+  }
+
+  .blog-card-cat-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #f97316;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .blog-card-cat-link:hover {
+    text-decoration: underline;
+  }
+
+  .blog-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fafafa;
+    margin: 0 0 8px;
+  }
+
+  .blog-card-excerpt {
+    font-size: 14px;
+    color: #a1a1aa;
+    margin: 0 0 12px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .blog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .blog-card-date {
+    font-size: 12px;
+    color: #71717a;
+  }
+
+  .blog-card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .blog-card-tag {
+    background: #27272a;
+    color: #a1a1aa;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .blog-card-tag:hover {
+    background: #3f3f46;
+    color: #fafafa;
+  }
+</style>

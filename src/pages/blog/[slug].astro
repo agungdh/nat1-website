@@ -1,0 +1,237 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPostBySlug } from '../../lib/api';
+import MarkdownIt from 'markdown-it';
+
+const { slug } = Astro.params;
+const post = await getPostBySlug(slug!);
+
+if (!post || post.status !== 'PUBLISHED') {
+  return new Response(null, { status: 404, statusText: 'Post not found' });
+}
+
+const md = new MarkdownIt({ html: true, linkify: true });
+const htmlContent = md.render(post.content);
+
+function formatDate(epochMs: number): string {
+  return new Date(epochMs).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+---
+
+<Layout title={`${post.title} — NAT1 Blog`}>
+  <main class="page">
+    <article class="post">
+      <a href="/blog" class="back-link">&larr; All posts</a>
+
+      <header class="post-header">
+        <a href={`/blog/category/${post.category.slug}`} class="post-category">{post.category.name}</a>
+        <h1 class="post-title">{post.title}</h1>
+        <div class="post-meta">
+          {post.publishedAt && <span class="post-date">{formatDate(post.publishedAt)}</span>}
+          {post.tags.length > 0 && (
+            <span class="post-tags">
+              {post.tags.map((tag) => (
+                <a href={`/blog/tag/${tag.slug}`} class="post-tag">{tag.name}</a>
+              ))}
+            </span>
+          )}
+        </div>
+      </header>
+
+      <div class="post-content" set:html={htmlContent} />
+    </article>
+
+    <footer>
+      <a href="/blog" class="back-link">&larr; All posts</a>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e4e4e7;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .back-link {
+    color: #f97316;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: #fb923c;
+  }
+
+  .post-header {
+    margin: 24px 0 32px;
+  }
+
+  .post-category {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f97316;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+
+  .post-category:hover {
+    text-decoration: underline;
+  }
+
+  .post-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fafafa;
+    margin: 0 0 12px;
+    line-height: 1.3;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .post-date {
+    font-size: 14px;
+    color: #71717a;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .post-tag {
+    background: #27272a;
+    color: #a1a1aa;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .post-tag:hover {
+    background: #3f3f46;
+    color: #fafafa;
+  }
+
+  .post-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #d4d4d8;
+  }
+
+  .post-content :global(h1),
+  .post-content :global(h2),
+  .post-content :global(h3),
+  .post-content :global(h4) {
+    color: #fafafa;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .post-content :global(h1) { font-size: 26px; }
+  .post-content :global(h2) { font-size: 22px; }
+  .post-content :global(h3) { font-size: 18px; }
+
+  .post-content :global(p) {
+    margin: 0 0 16px;
+  }
+
+  .post-content :global(a) {
+    color: #f97316;
+    text-decoration: underline;
+  }
+
+  .post-content :global(code) {
+    background: #18181b;
+    color: #f97316;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .post-content :global(pre) {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  .post-content :global(pre code) {
+    background: none;
+    color: #e4e4e7;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 3px solid #f97316;
+    margin: 16px 0;
+    padding: 8px 16px;
+    color: #a1a1aa;
+    background: #18181b;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .post-content :global(ul),
+  .post-content :global(ol) {
+    margin: 0 0 16px;
+    padding-left: 24px;
+  }
+
+  .post-content :global(li) {
+    margin-bottom: 6px;
+  }
+
+  .post-content :global(img) {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+
+  .post-content :global(hr) {
+    border: none;
+    border-top: 1px solid #27272a;
+    margin: 32px 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #27272a;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 24px 16px 60px; }
+    .post-title { font-size: 24px; }
+  }
+</style>

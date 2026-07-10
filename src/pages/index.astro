@@ -35,6 +35,9 @@ function fmt(bytes: number): string {
 
 <Layout title="PoC: VPS NAT — No Public IP, Still Serving">
 	<main class="page">
+		<nav class="top-nav">
+			<a href="/blog" class="nav-link">Blog</a>
+		</nav>
 		<section class="hero">
 			<div class="badge">Proof of Concept</div>
 			<h1>VPS NAT + Cloudflare Tunnel</h1>
@@ -144,6 +147,25 @@ function fmt(bytes: number): string {
 		max-width: 800px;
 		margin: 0 auto;
 		padding: 48px 24px 80px;
+	}
+
+	.top-nav {
+		display: flex;
+		justify-content: flex-end;
+		gap: 16px;
+		margin-bottom: 20px;
+	}
+
+	.nav-link {
+		color: #f97316;
+		font-size: 14px;
+		font-weight: 600;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.nav-link:hover {
+		color: #fb923c;
 	}
 
 	.hero {
