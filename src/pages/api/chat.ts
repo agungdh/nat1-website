@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.BACKEND_API_URL || 'http://localhost:8080';
+const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:8080';
 
 export const POST = async ({ request }: { request: Request }) => {
   const { messages } = await request.json();
