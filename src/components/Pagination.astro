@@ -1,0 +1,140 @@
+---
+const { currentPage, totalPages, baseUrl } = Astro.props as {
+  currentPage: number;
+  totalPages: number;
+  baseUrl: string;
+};
+
+const separator = baseUrl.includes('?') ? '&' : '?';
+
+function pageUrl(page: number): string {
+  return page === 0 ? baseUrl : `${baseUrl}${separator}page=${page}`;
+}
+
+const visiblePages = 5;
+const half = Math.floor(visiblePages / 2);
+let startPage = Math.max(0, currentPage - half);
+const endPage = Math.min(totalPages - 1, startPage + visiblePages - 1);
+startPage = Math.max(0, endPage - visiblePages + 1);
+
+const pages: number[] = [];
+for (let i = startPage; i <= endPage; i++) {
+  pages.push(i);
+}
+---
+
+{totalPages > 1 && (
+  <nav class="pagination">
+    {currentPage > 0 ? (
+      <a href={pageUrl(currentPage - 1)} class="page-link prev" rel="prev">&larr; Previous</a>
+    ) : (
+      <span class="page-link prev disabled">&larr; Previous</span>
+    )}
+
+    <div class="page-numbers">
+      {startPage > 0 && (
+        <>
+          <a href={pageUrl(0)} class="page-link">1</a>
+          {startPage > 1 && <span class="page-dots">...</span>}
+        </>
+      )}
+      {pages.map((page) => (
+        page === currentPage ? (
+          <span class="page-link active">{page + 1}</span>
+        ) : (
+          <a href={pageUrl(page)} class="page-link">{page + 1}</a>
+        )
+      ))}
+      {endPage < totalPages - 1 && (
+        <>
+          {endPage < totalPages - 2 && <span class="page-dots">...</span>}
+          <a href={pageUrl(totalPages - 1)} class="page-link">{totalPages}</a>
+        </>
+      )}
+    </div>
+
+    {currentPage < totalPages - 1 ? (
+      <a href={pageUrl(currentPage + 1)} class="page-link next" rel="next">Next &rarr;</a>
+    ) : (
+      <span class="page-link next disabled">Next &rarr;</span>
+    )}
+  </nav>
+)}
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    color: #a1a1aa;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    background: #18181b;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .page-link:hover {
+    border-color: #f97316;
+    color: #fafafa;
+  }
+
+  .page-link.active {
+    background: #f97316;
+    border-color: #f97316;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .page-link.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .page-link.prev,
+  .page-link.next {
+    padding: 0 14px;
+  }
+
+  .page-dots {
+    color: #52525b;
+    font-size: 14px;
+    padding: 0 4px;
+  }
+
+  @media (max-width: 600px) {
+    .pagination {
+      gap: 4px;
+    }
+    .page-link {
+      min-width: 32px;
+      height: 32px;
+      font-size: 13px;
+      padding: 0 8px;
+    }
+    .page-link.prev,
+    .page-link.next {
+      padding: 0 10px;
+    }
+  }
+</style>

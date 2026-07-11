@@ -1,11 +1,15 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import BlogCard from '../../../components/BlogCard.astro';
+import Pagination from '../../../components/Pagination.astro';
 import { getPosts, getTagBySlug } from '../../../lib/api';
 
 const { slug } = Astro.params;
-const [posts, tag] = await Promise.all([
-  getPosts(),
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get('page') || '0', 10);
+
+const [data, tag] = await Promise.all([
+  getPosts(currentPage, 10, undefined, slug!),
   getTagBySlug(slug!),
 ]);
 
@@ -13,9 +17,7 @@ if (!tag) {
   return new Response(null, { status: 404, statusText: 'Tag not found' });
 }
 
-const filtered = posts
-  .filter((p) => p.status === 'PUBLISHED' && p.tags.some((t) => t.slug === slug))
-  .sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
+const posts = data.content;
 ---
 
 <Layout title={`#${tag.name} — NAT1 Blog`}>
@@ -25,12 +27,18 @@ const filtered = posts
     </section>
 
     <div class="blog-grid">
-      {filtered.length === 0 ? (
+      {posts.length === 0 ? (
         <p class="empty">No posts with this tag yet.</p>
       ) : (
-        filtered.map((post) => <BlogCard post={post} />)
+        posts.map((post) => <BlogCard post={post} />)
       )}
     </div>
+
+    <Pagination
+      currentPage={currentPage}
+      totalPages={data.totalPages}
+      baseUrl={`/blog/tag/${slug}`}
+    />
 
     <footer>
       <a href="/blog" class="back-link">&larr; All posts</a>

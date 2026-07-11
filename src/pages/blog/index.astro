@@ -1,12 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BlogCard from '../../components/BlogCard.astro';
+import Pagination from '../../components/Pagination.astro';
 import { getPosts } from '../../lib/api';
 
-const posts = await getPosts();
-const published = posts
-  .filter((p) => p.status === 'PUBLISHED')
-  .sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get('page') || '0', 10);
+
+const data = await getPosts(currentPage, 10);
+const posts = data.content;
 ---
 
 <Layout title="Blog — NAT1 Website">
@@ -17,12 +19,18 @@ const published = posts
     </section>
 
     <div class="blog-grid">
-      {published.length === 0 ? (
+      {posts.length === 0 ? (
         <p class="empty">No posts yet.</p>
       ) : (
-        published.map((post) => <BlogCard post={post} />)
+        posts.map((post) => <BlogCard post={post} />)
       )}
     </div>
+
+    <Pagination
+      currentPage={currentPage}
+      totalPages={data.totalPages}
+      baseUrl="/blog"
+    />
 
     <footer>
       <a href="/" class="back-link">&larr; Back to home</a>

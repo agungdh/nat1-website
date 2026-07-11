@@ -26,6 +26,16 @@ export interface TagDto {
   name: string;
 }
 
+export interface PagedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 export interface ChatMessage {
   role: string;
   content: string;
@@ -41,8 +51,21 @@ async function apiFetch<T>(path: string): Promise<T | null> {
   }
 }
 
-export async function getPosts(): Promise<PostDto[]> {
-  return (await apiFetch<PostDto[]>('/api/posts')) || [];
+export async function getPosts(
+  page = 0,
+  size = 10,
+  category?: string,
+  tag?: string
+): Promise<PagedResponse<PostDto>> {
+  const params = new URLSearchParams();
+  params.set('page', String(page));
+  params.set('size', String(size));
+  params.set('sort', 'publishedAt,desc');
+  if (category) params.set('category', category);
+  if (tag) params.set('tag', tag);
+
+  const result = await apiFetch<PagedResponse<PostDto>>(`/api/posts?${params.toString()}`);
+  return result || { content: [], page: 0, size, totalElements: 0, totalPages: 0, first: true, last: true };
 }
 
 export async function getPostBySlug(slug: string): Promise<PostDto | null> {
